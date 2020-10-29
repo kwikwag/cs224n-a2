@@ -1,0 +1,455 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y_{w}\left(o\right)=\begin{cases}
+1 & w=0\\
+0 & \text{o.w.}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I don't like the CS224N notations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $P\left(O=o|C=c\right)$
+\end_inset
+
+ - 
+\begin_inset Formula $O$
+\end_inset
+
+ and 
+\begin_inset Formula $C$
+\end_inset
+
+ are suporious.
+ Also they identify this probabilty distribution with 
+\begin_inset Formula $\hat{y}$
+\end_inset
+
+ which is confusing.
+ I use 
+\begin_inset Formula $\hat{y}\left(o|c\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $u_{o}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{c}$
+\end_inset
+
+ - these are actually row vectors from 
+\begin_inset Formula $U$
+\end_inset
+
+ and 
+\begin_inset Formula $V$
+\end_inset
+
+ matrices only partly mentioned.
+ I think it is better to mention them explicity by using a capital letter.
+\end_layout
+
+\begin_layout Standard
+I also use 
+\begin_inset Formula $W$
+\end_inset
+
+ for the vocabulary of words.
+\end_layout
+
+\begin_layout Standard
+1a.
+ Equivalence of cross-entropy and naive-softmax losses.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+J_{\text{c.e.}}\left(c,o,U,\vec{V_{c}}\right) & =-\sum_{w\in V}y\left(w|c\right)\log\left(\hat{y}\left(w|c\right)\right)\\
+ & \underset{\forall w\ne o:\,y\left(w|c\right)=0}{=}-\log\left(\hat{y}\left(o|c\right)\right)=J_{\text{n.s.}}\left(c,o,U,\vec{V_{c}}\right)\\
+ & =-\log\frac{\exp\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\vec{U_{o}}^{\top}\vec{V_{c}}+\log\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)
+\end{align*}
+
+\end_inset
+
+Mark 
+\begin_inset Formula $Z\equiv\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)$
+\end_inset
+
+, then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{\text{c.e.}}\left(c,o,U,\vec{V_{c}}\right)=-\vec{U_{o}}^{\top}\vec{V_{c}}+\log Z
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1b.
+ Derivative with respect to the center-word vectors.
+ We use 
+\begin_inset Formula $\log'f\left(x\right)=\frac{f'\left(x\right)}{f\left(x\right)}$
+\end_inset
+
+, 
+\begin_inset Formula $\exp'f\left(x\right)=\exp f\left(x\right)f'\left(x\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{V_{c}}}J_{\text{n.s.}}\left(c,o,U,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{V_{c}}}\log\frac{\exp\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\vec{U_{o}}+\left[\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\right]^{-1}\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\vec{U_{w}}\\
+ & =-\vec{U_{o}}+\frac{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\vec{U_{w}}}{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\vec{U_{o}}+\sum_{w\in W}\frac{\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}{\sum_{w'\in W}\exp\left(\vec{U_{w'}}^{\top}\vec{V_{c}}\right)}\vec{U_{w}}\\
+ & =-\vec{U_{o}}+\sum_{w\in W}\hat{y}_{w}\vec{U_{w}}\\
+ & =-\vec{U_{o}}+\vec{\hat{y}}\vec{U}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note: if 
+\begin_inset Formula $\vec{U}$
+\end_inset
+
+ is a matrix of word vector rows, then 
+\begin_inset Formula $\vec{\hat{y}}$
+\end_inset
+
+ is a row vector.
+\end_layout
+
+\begin_layout Standard
+1c.
+ Derivative with respect to the outside-word vectors.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{U_{x}}^{\top}}J_{\text{n.s.}}\left(c,o,U,\vec{V_{c}}\right) & =\begin{cases}
+-\vec{V_{c}}^{\top}+\left[\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\right]^{-1}\exp\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{V_{o}}^{\top} & x=o\\
+\left[\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\right]^{-1}\exp\left(\vec{U_{x}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}^{\top} & x\neq o
+\end{cases}\\
+ & =-\vec{V_{c}}^{\top}\delta_{xo}+\left[\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\right]^{-1}\exp\left(\vec{U_{x}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}^{\top}\\
+ & =\begin{cases}
+\left(\frac{\exp\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}-1\right)\vec{V_{c}}^{\top} & x=o\\
+\frac{\exp\left(\vec{U_{x}}^{\top}\vec{V_{c}}\right)}{\sum_{w\in W}\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)}\vec{V_{c}}^{\top} & x\neq o
+\end{cases}\\
+ & =-\vec{V_{c}}^{\top}\delta_{xo}+Z^{-1}\exp\left(\vec{U_{x}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}^{\top}\\
+ & =\begin{cases}
+\left(\frac{\exp\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}{Z}-1\right)\vec{V_{c}}^{\top} & x=o\\
+\frac{\exp\left(\vec{U_{x}}^{\top}\vec{V_{c}}\right)}{Z}\vec{V_{c}}^{\top} & x\neq o
+\end{cases}\\
+ & =\begin{cases}
+\left(\hat{y}_{o}-1\right)\vec{V_{c}}^{\top} & x=o\\
+\hat{y}_{x}\vec{V_{c}}^{\top} & x\neq o
+\end{cases}\\
+\implies\frac{\partial}{\partial\vec{U}^{\top}}J_{\text{n.s.}}\left(c,o,U,\vec{V_{c}}\right) & =\left[Z^{-1}\left(\exp\left(\vec{U_{w}}^{\top}\vec{V_{c}}\right)\right)_{w\in W}-\vec{\delta_{xo}}\right]\times\vec{V_{c}}^{\top}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1d.
+ Derivative of sigmoid.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\sigma\left(x\right)=\frac{1}{1+e^{-x}}=\left[1+\exp\left(-x\right)\right]^{-1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial x}\sigma\left(x\right) & =-\left[1+\exp\left(-x\right)\right]^{-2}\left(-\exp\left(-x\right)\right)\\
+ & =\frac{\exp\left(-x\right)}{1+2\exp\left(-x\right)+\exp\left(-2x\right)}\\
+ & =\frac{1}{2+\exp\left(x\right)+\exp\left(-x\right)}\\
+ & =\exp\left(-x\right)\sigma^{2}\left(x\right)\\
+ & =\frac{1-\sigma\left(x\right)}{\sigma\left(x\right)}\sigma^{2}\left(x\right)\\
+ & =\left(1-\sigma\left(x\right)\right)\sigma\left(x\right)
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\sigma\left(x\right)=\frac{1}{1+e^{-x}}\implies e^{-x}=\frac{1}{\sigma\left(x\right)}-1=\frac{1-\sigma\left(x\right)}{\sigma\left(x\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+1e.
+ Negative sampling.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\log\sigma\left(x\right) & =\log\frac{1}{1+e^{-x}}\\
+ & =-\log\left(1+e^{-x}\right)\\
+ & =\sum_{k=1}^{\infty}\frac{\left(-1\right)^{k}e^{-kx}}{k}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
+ & =-\log\left[\frac{1}{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}/\prod_{k=1}^{K}\frac{1}{1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}}\right]\\
+ & =-\log\left[\frac{\prod_{k=1}^{K}\left(1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}\right)}{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}\right]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{V_{c}}}J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
+ & =-\frac{\exp\left(-\vec{U_{o}}^{\top}\vec{V_{c}}\right)\sigma^{\cancel{2}}\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{U_{o}}}{\cancel{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}}\\
+ & \quad-\sum_{k=1}^{K}\frac{\exp\left(\vec{U_{k}}^{\top}\vec{V_{c}}\right)\sigma^{\cancel{2}}\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\left(-\vec{U_{k}}^{\top}\right)}{\cancel{\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)}}\\
+ & =-\exp\left(-\vec{U_{o}}^{\top}\vec{V_{c}}\right)\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{U_{o}}\\
+ & \quad+\sum_{k=1}^{K}\exp\left(\vec{U_{k}}^{\top}\vec{V_{c}}\right)\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\vec{U_{k}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{V_{c}}}J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
+ & =-\frac{\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{U_{o}}}{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}\\
+ & \quad+\sum_{k=1}^{K}\frac{\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\vec{U_{k}}}{\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\vec{U_{o}}+\sum_{k=1}^{K}\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\vec{U_{k}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{U_{x}}^{\top}}J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{U_{x}}^{\top}}\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\frac{\partial}{\partial\vec{U_{x}}^{\top}}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
+ & =-\frac{\exp\left(-\vec{U_{o}}^{\top}\vec{V_{c}}\right)\sigma^{\cancel{2}}\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}}{\cancel{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}}\delta_{xo}\\
+ & -\sum_{k=1}^{K}\frac{\exp\left(\vec{U_{k}}^{\top}\vec{V_{c}}\right)\sigma^{\cancel{2}}\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\left(-\vec{V_{c}}\right)}{\cancel{\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)}}\delta_{xk}\\
+ & =-\exp\left(-\vec{U_{o}}^{\top}\vec{V_{c}}\right)\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}\delta_{xo}\\
+ & -\sum_{k=1}^{K}\exp\left(\vec{U_{k}}^{\top}\vec{V_{c}}\right)\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\left(-\vec{V_{c}}\right)\delta_{xk}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\vec{U_{x}}^{\top}}J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{U_{x}}^{\top}}\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\frac{\partial}{\partial\vec{U_{x}}^{\top}}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
+ & =-\frac{\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{V_{c}}^{\top}}{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}-\sum_{k=1}^{K}\frac{\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\left(-\vec{V_{c}}^{\top}\right)}{\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\vec{V_{c}}^{\top}\delta_{xo}+\sum_{k=1}^{K}\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\vec{V_{c}}^{\top}\delta_{xk}\\
+ & =\begin{cases}
+-\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\vec{V_{c}}^{\top} & x=o\\
+\quad\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\vec{V_{c}}^{\top} & x=k\in\left\{ 1..K\right\} 
+\end{cases}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This loss function is more efficient for computation because it does not
+ contain 
+\begin_inset Formula $Z$
+\end_inset
+
+ - there is no need to compute a expression involving 
+\begin_inset Formula $O\left(\left|V\right|\right)$
+\end_inset
+
+, the complexity if thus 
+\begin_inset Formula $O\left(K\right)$
+\end_inset
+
+ per 
+\begin_inset Formula $c,o$
+\end_inset
+
+ pair.
+\end_layout
+
+\begin_layout Standard
+1f.
+ Total skip-gram loss derivatives.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+J_{\text{s.g.}}\left(c,m,U,\vec{V}_{c}\right)=\sum_{c-m\leq o\leq c+m}J\left(c,o,U,\vec{V_{c}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial U}J_{\text{s.g.}}\left(c,m,U,\vec{V}_{c}\right)=\sum_{c-m\leq o\leq c+m}\frac{\partial}{\partial U}J\left(c,o,U,\vec{V_{c}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{\partial}{\partial V_{c}}J_{\text{s.g.}}\left(c,m,U,\vec{V}_{c}\right)=\sum_{c-m\leq o\leq c+m}\frac{\partial}{\partial\vec{V_{c}}}J\left(c,o,U,\vec{V_{c}}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
