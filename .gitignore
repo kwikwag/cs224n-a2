@@ -1,2 +1,10 @@
 *.pyc
 __pycache__
+/.vscode
+/.ipynb_checkpoints
+/*.ipynb
+/utils/datasets
+/a2_sol.pdf
+/a2_sol.tex
+/#*#
+*~

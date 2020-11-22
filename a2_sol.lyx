@@ -286,10 +286,10 @@ Note: if
 \end_inset
 
 
-\begin_inset Newline newline
-\end_inset
+\end_layout
 
-
+\begin_layout Standard
+Where we use the identity:
 \begin_inset Formula 
 \[
 \sigma\left(x\right)=\frac{1}{1+e^{-x}}\implies e^{-x}=\frac{1}{\sigma\left(x\right)}-1=\frac{1-\sigma\left(x\right)}{\sigma\left(x\right)}
@@ -306,6 +306,14 @@ Note: if
 \end_layout
 
 \begin_layout Standard
+Just a thought about how the Taylor series of 
+\begin_inset Formula $\log\sigma\left(x\right)$
+\end_inset
+
+ looks like:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
 \log\sigma\left(x\right) & =\log\frac{1}{1+e^{-x}}\\
@@ -319,16 +327,45 @@ Note: if
 \end_layout
 
 \begin_layout Standard
+In terms of the loss functions:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
 J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
  & =-\log\left[\frac{1}{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}/\prod_{k=1}^{K}\frac{1}{1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}}\right]\\
- & =-\log\left[\frac{\prod_{k=1}^{K}\left(1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}\right)}{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}\right]
+ & =-\log\left[\frac{\prod_{k=1}^{K}\left(1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}\right)}{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}\right]\\
+ & =\log\left[\frac{1+e^{-\vec{U_{o}}^{\top}\vec{V_{c}}}}{\prod_{k=1}^{K}\left(1+e^{\vec{U_{k}}^{\top}\vec{V_{c}}}\right)}\right]
 \end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+This gives a bit of intuition on the similarity and dissimilarity between
+ the negative sampling loss function and the naive softmax loss function.
+\end_layout
+
+\begin_layout Standard
+Nothing interesting here.
+ Let's go on to get the derivatives.
+ First, we note that since 
+\begin_inset Formula $\partial/\partial x\log f\left(x\right)=f'\left(x\right)/f\left(x\right)$
+\end_inset
+
+, we have 
+\begin_inset Formula $\partial/\partial x\log\sigma\left(x\right)=\left(1-\sigma\left(x\right)\right)$
+\end_inset
+
+, and more generally 
+\begin_inset Formula $\partial/\partial x\log\sigma\left(f\left(x\right)\right)=\left(1-\sigma\left(f\left(x\right)\right)\right)f'\left(x\right)$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -350,7 +387,7 @@ J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_
 \begin_inset Formula 
 \begin{align*}
 \frac{\partial}{\partial\vec{V_{c}}}J_{\text{NEG}}\left(c,o,\left\{ \vec{U_{k_{i}}}\right\} _{i=1}^{K}\cup\left\{ U_{o}\right\} ,\vec{V_{c}}\right) & =-\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)-\sum_{k=1}^{K}\frac{\partial}{\partial\vec{V_{c}}}\log\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\\
- & =-\frac{\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\vec{U_{o}}}{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}\\
+ & =-\frac{\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\vec{U_{o}}}{\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)}\\
  & \quad+\sum_{k=1}^{K}\frac{\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\vec{U_{k}}}{\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)}\\
  & =-\left(1-\sigma\left(\vec{U_{o}}^{\top}\vec{V_{c}}\right)\right)\vec{U_{o}}+\sum_{k=1}^{K}\left(1-\sigma\left(-\vec{U_{k}}^{\top}\vec{V_{c}}\right)\right)\vec{U_{k}}
 \end{align*}

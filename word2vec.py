@@ -66,7 +66,7 @@ def naiveSoftmaxLossAndGradient(
     product = np.dot(outsideVectors, centerWordVec) # (vocab size, word vec size) * (word vec size,) = (vocab size,)
     # or centerWordVec @ outsideVectors.T  # (vocab size,)
     
-    y_hat = softmax(product)  # (vocab size,1)
+    y_hat = softmax(product)  # (vocab size, 1)
 
     # sanity checks
     # debug_softmax_result = np.exp(centerWordVec @ outsideVectors[outsideWordIdx, :].T) / z
@@ -78,8 +78,10 @@ def naiveSoftmaxLossAndGradient(
     gradCenterVec = (
         -outsideVectors[outsideWordIdx, :] +
         # I initially wrote: (np.sum(y_hat * outsideVectors.T, axis=1).T)  # broadcasting
-        np.dot(y_hat, outsideVectors)
-    )  # (1, word vec size) 
+        # But this is in fact just a column-wise dot product between each of the row vectors in outsideVectors
+        # with the y_hat column vector.
+        np.dot(y_hat, outsideVectors)  # (vocab size, 1) * 
+    )  # (1, word vec size)
 
     assert gradCenterVec.shape == centerWordVec.shape
 
@@ -138,22 +140,52 @@ def negSamplingLossAndGradient(
 
     ### YOUR CODE HERE (~10 Lines)
     ### Please use your implementation of sigmoid in here.
-    u_sub = outsideVectors[indices, :]  # (K+1, word vec size)
-    product = centerWordVec @ u_sub.T  # (word vec size,) * (K+1, word vec size) = (K+1,)
-    product[1:] = -product[1:]  # opposite sign for outside/negative words
-    sig_product = sigmoid(product)
-    summand_sign = np.ones(sig_product.shape)
-    summand_sign[0] = -summand_sign[0]
 
-    loss = -np.sum(np.log(sig_product))
-    gradCenterVec = np.sum((np.exp(-product) * sig_product * summand_sign * u_sub.T).T, axis=0)  # broadcasting over u_sub
+    from collections import Counter
+    counts = Counter(negSampleWordIndices)
+    # this would be wrong as we want to count multiple samples as much as they are sampled
+    # indices = [outsideWordIdx] + list(counts.keys())
+    index_counts = np.array([1] + [counts[index] for index in indices[1:]])
+
+    summand_sign = np.ones((len(indices),))
+    summand_sign[0] = -summand_sign[0]  # -1 for center word, 1 for rest
+    
+    u_sub = outsideVectors[indices, :]  # (K+1, word vec size)
+    # print(f'u_sub.shape={u_sub.shape}, centerWordVec.shape={centerWordVec.shape}, summand_sign.shape={summand_sign.shape}')
+    product = -np.dot(u_sub, centerWordVec) * summand_sign  # (word vec size,) x (K+1, word vec size) = (K+1,)
+    sig_product = sigmoid(product)  # (K+1,)
+    loss = -np.sum(np.log(sig_product))  # (1,)
+
+    dsig_product = (1-sig_product.copy()) * summand_sign  # (K+1,)
+    gradCenterVec = np.dot(dsig_product, u_sub)  # (K+1,) x (K+1, word vec size) = (word vec size,)
     assert gradCenterVec.shape == centerWordVec.shape
 
-    # outer product
     gradOutsideVecs = np.zeros(outsideVectors.shape)
-    gradOutsideVecs_sub = np.outer((np.exp(-product) * sig_product * summand_sign), centerWordVec)
+    gradOutsideVecs_sub = np.outer(dsig_product, centerWordVec)  # (K+1,) >< (word vec size,) = (K+1, word vec size)
     assert gradOutsideVecs_sub.shape == u_sub.shape
-    gradOutsideVecs[indices, :] = gradOutsideVecs_sub
+
+    gradOutsideVecs[indices, :] = gradOutsideVecs_sub * index_counts.reshape(-1, 1)
+
+    # u_sub = outsideVectors[indices, :]  # (K+1, word vec size)
+    # product = centerWordVec @ u_sub.T  # (word vec size,) * (K+1, word vec size) = (K+1,)
+    # product[1:] = -product[1:]  # opposite sign for outside/negative words
+    # sig_product = sigmoid(product)
+    # summand_sign = np.ones(sig_product.shape)
+    # summand_sign[0] = -summand_sign[0]
+    
+    # dsig_product = -sig_product.copy()
+    # dsig_product[0] = -dsig_product[0]
+
+    # loss = -np.sum(np.log(sig_product))
+    # gradCenterVec = np.sum((np.exp(-product) * dsig_product * summand_sign * u_sub.T).T, axis=0)  # broadcasting over u_sub
+    # assert gradCenterVec.shape == centerWordVec.shape
+
+    # # outer product
+    # gradOutsideVecs = np.zeros(outsideVectors.shape)
+    # gradOutsideVecs_sub = np.outer((np.exp(-product) * dsig_product * summand_sign), centerWordVec)
+    # assert gradOutsideVecs_sub.shape == u_sub.shape
+    # gradOutsideVecs[indices, :] = gradOutsideVecs_sub
+
     ### END YOUR CODE
 
     return loss, gradCenterVec, gradOutsideVecs
